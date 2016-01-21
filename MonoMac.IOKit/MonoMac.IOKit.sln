@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
+# Visual Studio 2012
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoMac.IOKit", "MonoMac.IOKit\MonoMac.IOKit.csproj", "{387CEFFC-FC6C-4553-A606-22C7FCB9AA9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortMonitor", "SerialPortMonitor\SerialPortMonitor.csproj", "{693EB60D-3A22-4B54-87D5-480E7F1CED04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{387CEFFC-FC6C-4553-A606-22C7FCB9AA9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{387CEFFC-FC6C-4553-A606-22C7FCB9AA9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{387CEFFC-FC6C-4553-A606-22C7FCB9AA9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{693EB60D-3A22-4B54-87D5-480E7F1CED04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{693EB60D-3A22-4B54-87D5-480E7F1CED04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{693EB60D-3A22-4B54-87D5-480E7F1CED04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{693EB60D-3A22-4B54-87D5-480E7F1CED04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

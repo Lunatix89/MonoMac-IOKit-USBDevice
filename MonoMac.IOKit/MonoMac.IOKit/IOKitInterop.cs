@@ -225,7 +225,7 @@ namespace MonoMac.IOKit {
 			// var bsdPathAsCFString = IORegistryEntryCreateCFProperty(modemService, __CFStringMakeConstantString(key), kCFAllocatorDefault, 0);
 
 			if (bsdPathAsCFValue != IntPtr.Zero) {
-				// Convert the value from a CFString to a C (NUL-terminated) string.
+				// Convert the value from a CFString to a C (NULL-terminated) string.
 
 				var bsdValue = new StringBuilder(maxValueSize);
 				var result = NativeMethods.CFStringGetCString(bsdPathAsCFValue, bsdValue, maxValueSize, CFStringEncoding.kCFStringEncodingUTF8);
@@ -233,12 +233,15 @@ namespace MonoMac.IOKit {
 				if (result) {
 					kernResult = KERN_SUCCESS;
 					value = bsdValue.ToString();
+				} else {
+					value = null;
 				}
 
 				NativeMethods.CFRelease(bsdPathAsCFValue);
+			} else {
+				value = null;
 			}
-
-			value = null;
+				
 			return kernResult;
 		}
 
@@ -267,9 +270,6 @@ namespace MonoMac.IOKit {
 		/// <returns>An integer.</returns>
 		public static int GetCFPropertyInt(IOObject dictionary, string key, out int value) {
 			var kernResult = KERN_FAILURE;
-
-			value = 0;
-
 			var bsdPathAsCFValue = NativeMethods.IORegistryEntrySearchCFProperty(dictionary.Handle, kIOServicePlane, NativeMethods.__CFStringMakeConstantString(key), kCFAllocatorDefault, kIORegistryIterateRecursively);
 			//var bsdPathAsCFString = IORegistryEntryCreateCFProperty(modemService, __CFStringMakeConstantString(key), kCFAllocatorDefault, 0);
 
@@ -282,9 +282,13 @@ namespace MonoMac.IOKit {
 				if (result) {
 					kernResult = KERN_SUCCESS;
 					value = bsdValue.ToInt32();
+				} else {
+					value = 0;
 				}
 
 				NativeMethods.CFRelease(bsdPathAsCFValue);
+			} else {
+				value = 0;
 			}
 
 			return kernResult;
@@ -303,7 +307,7 @@ namespace MonoMac.IOKit {
 		/// </summary>
 		/// <param name="obj">The object to release.</param>
 		internal static void IOObjectRelease(IOObject obj) {
-			NativeMethods.CFRelease(obj.Handle);
+			NativeMethods.IOObjectRelease(obj.Handle);
 		}
 
 		/// <summary>
@@ -361,7 +365,7 @@ namespace MonoMac.IOKit {
 			public static extern int IORegistryEntryCreateIterator(IntPtr entry, string plane, uint options, out IntPtr iterator);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
-			public static extern int IORegistryEntryGetNameInPlane(IntPtr entry, string plane, string name);
+			public static extern int IORegistryEntryGetNameInPlane(IntPtr entry, string plane, StringBuilder name);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
 			public static extern bool IOObjectConformsTo(IntPtr obj, string className);
@@ -443,7 +447,7 @@ namespace MonoMac.IOKit {
 				if (status == kIOReturnSuccess) {
 					var currentService = IntPtr.Zero;
 					while ((currentService = IOIteratorNext(iterator)) != IntPtr.Zero) {
-						var serviceName = String.Empty;
+						var serviceName = new StringBuilder();
 
 						status = IORegistryEntryGetNameInPlane(currentService, kIOServicePlane, serviceName);
 						if ((status == kIOReturnSuccess) && (IOObjectConformsTo(currentService, kIOUSBDeviceClassName))) {
