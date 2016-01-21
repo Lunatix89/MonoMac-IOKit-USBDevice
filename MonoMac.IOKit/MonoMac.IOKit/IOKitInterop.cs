@@ -12,7 +12,7 @@ namespace MonoMac.IOKit {
 	/// <summary>
 	/// Native interop code to use the IOKit framework.
 	/// </summary>
-	public static class IOKitInterop {
+	public static class IOKitFramework {
 		/// <summary>
 		/// IOKit Framework Path
 		/// </summary>

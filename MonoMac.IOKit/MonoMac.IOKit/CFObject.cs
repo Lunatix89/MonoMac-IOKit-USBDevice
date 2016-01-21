@@ -52,7 +52,7 @@ namespace MonoMac.IOKit {
 				}
 
 				if (handle != IntPtr.Zero) {
-					IOKitInterop.CFRelease(this);
+					IOKitFramework.CFRelease(this);
 					handle = IntPtr.Zero;
 				}
 

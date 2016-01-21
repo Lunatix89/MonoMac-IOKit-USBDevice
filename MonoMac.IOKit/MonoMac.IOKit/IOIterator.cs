@@ -31,7 +31,7 @@ namespace MonoMac.IOKit {
 				throw new InvalidOperationException("Can not iterate over uninitialized objects.");
 			}
 
-			return IOKitInterop.IOIteratorNext(this);
+			return IOKitFramework.IOIteratorNext(this);
 		}
 
 	}

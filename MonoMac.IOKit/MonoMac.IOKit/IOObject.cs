@@ -53,7 +53,7 @@ namespace MonoMac.IOKit {
 				}
 
 				if (handle != IntPtr.Zero) {
-					IOKitInterop.IOObjectRelease(this);
+					IOKitFramework.IOObjectRelease(this);
 					handle = IntPtr.Zero;
 				}
 
@@ -68,7 +68,7 @@ namespace MonoMac.IOKit {
 		/// <returns>The keys value on success; Otherwise, null.</returns>
 		public string GetCFPropertyString(string keyName) {
 			string value = null;
-			IOKitInterop.GetCFPropertyString(this, keyName, out value);
+			IOKitFramework.GetCFPropertyString(this, keyName, out value);
 
 			return value;
 		}
@@ -79,7 +79,7 @@ namespace MonoMac.IOKit {
 		/// <param name="keyName">The key name to look up.</param>
 		/// <returns>The keys value on success; Otherwise, null.</returns>
 		public int GetCFPropertyInt(string keyName) {
-			return IOKitInterop.GetCFPropertyInt(this, keyName);
+			return IOKitFramework.GetCFPropertyInt(this, keyName);
 		}
 
 	}
