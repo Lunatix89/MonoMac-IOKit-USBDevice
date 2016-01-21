@@ -163,6 +163,10 @@ namespace MonoMac.IOKit {
 				return null;
 			}
 
+			if (serialPortIterator == IntPtr.Zero) {
+				return null;
+			}
+
 			return new IOIterator(serialPortIterator);
 		}
 
