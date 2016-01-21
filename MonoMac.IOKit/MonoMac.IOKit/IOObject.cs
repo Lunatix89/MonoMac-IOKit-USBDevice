@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Kinematics.PowerBrainCommunication.IOKitFramework {
+namespace MonoMac.IOKit {
 
 	/// <summary>
 	/// Manages native IOObject references.
 	/// </summary>
-	internal class IOObject : IDisposable {
+	public class IOObject : IDisposable {
 		protected IntPtr handle;
 		protected bool disposedValue = false;
 
@@ -59,6 +59,27 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 
 				disposedValue = true;
 			}
+		}
+
+		/// <summary>
+		/// Gets a properties value.
+		/// </summary>
+		/// <param name="keyName">The key name to look up.</param>
+		/// <returns>The keys value on success; Otherwise, null.</returns>
+		public string GetCFPropertyString(string keyName) {
+			string value = null;
+			IOKitInterop.GetCFPropertyString(this, keyName, out value);
+
+			return value;
+		}
+
+		/// <summary>
+		/// Gets a properties value.
+		/// </summary>
+		/// <param name="keyName">The key name to look up.</param>
+		/// <returns>The keys value on success; Otherwise, null.</returns>
+		public int GetCFPropertyInt(string keyName) {
+			return IOKitInterop.GetCFPropertyInt(this, keyName);
 		}
 
 	}

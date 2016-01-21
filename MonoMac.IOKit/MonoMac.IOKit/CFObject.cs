@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Kinematics.PowerBrainCommunication.IOKitFramework {
+namespace MonoMac.IOKit {
 
 	/// <summary>
 	/// Manages native CFObjects references.

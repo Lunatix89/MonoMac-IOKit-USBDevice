@@ -6,13 +6,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Kinematics.PowerBrainCommunication.IOKitFramework {
+namespace MonoMac.IOKit {
 
 
 	/// <summary>
 	/// Native interop code to use the IOKit framework.
 	/// </summary>
-	internal static class IOKitInterop {
+	public static class IOKitInterop {
 		/// <summary>
 		/// IOKit Framework Path
 		/// </summary>
@@ -186,10 +186,10 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 		/// </summary>
 		/// <param name="modemService">A modem service.</param>
 		/// <returns>An instance of a <see cref="CFObject"/> on success; Otherwise, false.</returns>
-		public static CFDictionary GetUSBDevice(IOObject modemService) {
+		public static IOObject GetUSBDevice(IOObject modemService) {
 			var device = NativeMethods.GetUsbDevice(modemService.Handle);
 			if (device != IntPtr.Zero) {
-				return new CFDictionary(device);
+				return new IOObject(device);
 			}
 
 			return null;
@@ -201,7 +201,7 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 		/// <param name="dictionary">The dictionary to use.</param>
 		/// <param name="key">The key to look up.</param>
 		/// <returns>A string on sucess; Otherwise, null.</returns>
-		public static string GetCFPropertyString(CFDictionary dictionary, string key) {
+		public static string GetCFPropertyString(IOObject dictionary, string key) {
 			var value = String.Empty;
 			var kernResult = GetCFPropertyString(dictionary, key, out value);
 			if (kernResult == KERN_SUCCESS) {
@@ -218,7 +218,7 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 		/// <param name="key">The key to look up.</param>
 		/// <param name="value">Receives the value.</param>
 		/// <returns>KERN_SUCCESS on success.</returns>
-		public static int GetCFPropertyString(CFDictionary dictionary, string key, out string value) {
+		public static int GetCFPropertyString(IOObject dictionary, string key, out string value) {
 			var maxValueSize = 4096;
 			var kernResult = KERN_FAILURE;
 			var bsdPathAsCFValue = NativeMethods.IORegistryEntrySearchCFProperty(dictionary.Handle, kIOServicePlane, NativeMethods.__CFStringMakeConstantString(key), kCFAllocatorDefault, kIORegistryIterateRecursively);
@@ -248,9 +248,9 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 		/// <param name="dictionary">The dictionary to use.</param>
 		/// <param name="key">The key to look up.</param>
 		/// <returns>A string on sucess; Otherwise, null.</returns>
-		public static int GetCFPropertyInt(CFObject modemService, string key) {
+		public static int GetCFPropertyInt(IOObject dictionary, string key) {
 			var result = 0;
-			var kernResult = GetCFPropertyInt(modemService, key, out result);
+			var kernResult = GetCFPropertyInt(dictionary, key, out result);
 			if (kernResult == KERN_SUCCESS) {
 				return result;
 			}
@@ -265,12 +265,12 @@ namespace Kinematics.PowerBrainCommunication.IOKitFramework {
 		/// <param name="key">The key to look up.</param>
 		/// <param name="value">Receives the value.</param>
 		/// <returns>An integer.</returns>
-		public static int GetCFPropertyInt(CFObject modemService, string key, out int value) {
+		public static int GetCFPropertyInt(IOObject dictionary, string key, out int value) {
 			var kernResult = KERN_FAILURE;
 
 			value = 0;
 
-			var bsdPathAsCFValue = NativeMethods.IORegistryEntrySearchCFProperty(modemService.Handle, kIOServicePlane, NativeMethods.__CFStringMakeConstantString(key), kCFAllocatorDefault, kIORegistryIterateRecursively);
+			var bsdPathAsCFValue = NativeMethods.IORegistryEntrySearchCFProperty(dictionary.Handle, kIOServicePlane, NativeMethods.__CFStringMakeConstantString(key), kCFAllocatorDefault, kIORegistryIterateRecursively);
 			//var bsdPathAsCFString = IORegistryEntryCreateCFProperty(modemService, __CFStringMakeConstantString(key), kCFAllocatorDefault, 0);
 
 			if (bsdPathAsCFValue != IntPtr.Zero) {

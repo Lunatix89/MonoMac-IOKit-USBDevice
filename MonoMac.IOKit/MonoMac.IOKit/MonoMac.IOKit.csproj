@@ -41,10 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CFDictionary.cs" />
     <Compile Include="CFObject.cs" />
     <Compile Include="IOIterator.cs" />
-    <Compile Include="IOKit.cs" />
     <Compile Include="IOKitInterop.cs" />
     <Compile Include="IOObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

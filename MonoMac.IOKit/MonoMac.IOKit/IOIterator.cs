@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Kinematics.PowerBrainCommunication.IOKitFramework {
+namespace MonoMac.IOKit {
 
 	/// <summary>
 	/// Manages IOIterator handles.
 	/// </summary>
-	internal class IOIterator : IOObject {
+	public class IOIterator : IOObject {
 
 		/// <summary>
 		/// Initializes a new instance of the see <see cref="IOObject"/>.
