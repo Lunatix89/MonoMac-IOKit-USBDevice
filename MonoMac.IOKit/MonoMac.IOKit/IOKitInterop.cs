@@ -159,7 +159,9 @@ namespace MonoMac.IOKit {
 			var kernResult = NativeMethods.FindModems(ref serialPortIterator);
 
 			if (KERN_SUCCESS != kernResult) {
-				Trace.TraceError("No modems were found.\n");
+				if (SerialPortIOKit.Verbosity > TraceVerbosity.Silent) {
+					Trace.TraceError("No modems were found.\n");
+				}
 				return null;
 			}
 
@@ -377,7 +379,10 @@ namespace MonoMac.IOKit {
 			public static int FindModems(ref IntPtr matchingServices) {
 				IntPtr classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
 				if (classesToMatch == IntPtr.Zero) {
-					Trace.TraceError("IOServiceMatching returned a NULL dictionary.");
+					if (SerialPortIOKit.Verbosity > TraceVerbosity.Silent) {
+						Trace.TraceError("IOServiceMatching returned a NULL dictionary.");
+					}
+
 					return KERN_FAILURE;
 				}
 
@@ -397,7 +402,9 @@ namespace MonoMac.IOKit {
 				// Get an iterator across all matching devices.
 				var kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault, classesToMatch, out matchingServices);
 				if (KERN_SUCCESS != kernResult) {
-					Trace.TraceError("IOServiceGetMatchingServices returned {0}\n", kernResult);
+					if (SerialPortIOKit.Verbosity > TraceVerbosity.Silent) {
+						Trace.TraceError("IOServiceGetMatchingServices returned {0}\n", kernResult);
+					}
 				}
 
 				return KERN_SUCCESS;
@@ -429,7 +436,10 @@ namespace MonoMac.IOKit {
 					CFRelease(bsdPathAsCFString);
 
 					if (result) {
-						Trace.TraceInformation("Modem found with BSD path: {0}", bsdPath);
+						if (SerialPortIOKit.Verbosity > TraceVerbosity.ErrorAndWarning) {
+							Trace.TraceInformation("Modem found with BSD path: {0}", bsdPath);
+						}
+
 						kernResult = KERN_SUCCESS;
 						path = bsdPath.ToString();
 					}

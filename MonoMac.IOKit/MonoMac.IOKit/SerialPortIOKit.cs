@@ -7,9 +7,49 @@ using System.Text;
 namespace MonoMac.IOKit {
 
 	/// <summary>
+	/// Verbosity enumeration.
+	/// </summary>
+	public enum TraceVerbosity {
+
+		/// <summary>
+		/// No messages will be sent to trace listeners.
+		/// </summary>
+		Silent,
+
+		/// <summary>
+		/// Only error messages will be sent to trace listeners.
+		/// </summary>
+		Error,
+
+
+		/// <summary>
+		/// Only error and warning messages will be sent to trace listeners.
+		/// </summary>
+		ErrorAndWarning,
+
+		/// <summary>
+		/// All messages will be sent to trace listeners.
+		/// </summary>
+		All
+
+	}
+
+	/// <summary>
 	/// Serial port utilities using IOKit.
 	/// </summary>
 	public static class SerialPortIOKit {
+#if DEBUG
+		private static TraceVerbosity verbosity = TraceVerbosity.All;
+#else
+		private static TraceVerbosity verbosity = TraceVerbosity.ErrorAndWarning;
+#endif
+		/// <summary>
+		/// Gets or sets the trace verbosity.
+		/// </summary>
+		public static TraceVerbosity Verbosity {
+			get { return verbosity; }
+			set { verbosity = value; }
+		}
 
 		/// <summary>
 		/// Returns a list of available communication devices.
@@ -26,7 +66,9 @@ namespace MonoMac.IOKit {
 						using (modemService) {
 							var modemPath = IOKitFramework.GetModemPath (modemService);
 							if (String.IsNullOrEmpty (modemPath)) {
-								Trace.TraceError ("Could not get path for modem.\n");
+								if (verbosity > TraceVerbosity.Silent) {
+									Trace.TraceError("Could not get path for modem.\n");
+								}
 							} else {
 								using (var device = IOKitFramework.GetUSBDevice (modemService)) {
 									if (device != null) {
