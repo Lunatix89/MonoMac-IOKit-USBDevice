@@ -232,18 +232,22 @@ namespace MonoMac.IOKit {
 
 			if (bsdPathAsCFValue != IntPtr.Zero) {
 				// Convert the value from a CFString to a C (NULL-terminated) string.
+				try {
+					unsafe {
+						fixed (char* bsdValue = new char[maxValueSize]) {
+							var result = NativeMethods.CFStringGetCString (bsdPathAsCFValue, bsdValue, maxValueSize, CFStringEncoding.kCFStringEncodingUTF8);
 
-				var bsdValue = new StringBuilder(maxValueSize);
-				var result = NativeMethods.CFStringGetCString(bsdPathAsCFValue, bsdValue, maxValueSize, CFStringEncoding.kCFStringEncodingUTF8);
-
-				if (result) {
-					kernResult = KERN_SUCCESS;
-					value = bsdValue.ToString();
-				} else {
-					value = null;
+							if (result) {
+								kernResult = KERN_SUCCESS;
+								value = Marshal.PtrToStringAnsi ((IntPtr)bsdValue);
+							} else {
+								value = null;
+							}
+						}
+					}
+				} finally {
+					NativeMethods.CFRelease (bsdPathAsCFValue);
 				}
-
-				NativeMethods.CFRelease(bsdPathAsCFValue);
 			} else {
 				value = null;
 			}
@@ -281,18 +285,19 @@ namespace MonoMac.IOKit {
 
 			if (bsdPathAsCFValue != IntPtr.Zero) {
 				// Convert the value from a CFNumber to an integer.
+				try {
+					var bsdValue = IntPtr.Zero;
+					var result = NativeMethods.CFNumberGetValue(bsdPathAsCFValue, CFNumberType.kCFNumberIntType, out bsdValue);
 
-				var bsdValue = IntPtr.Zero;
-				var result = NativeMethods.CFNumberGetValue(bsdPathAsCFValue, CFNumberType.kCFNumberIntType, out bsdValue);
-
-				if (result) {
-					kernResult = KERN_SUCCESS;
-					value = bsdValue.ToInt32();
-				} else {
-					value = 0;
+					if (result) {
+						kernResult = KERN_SUCCESS;
+						value = bsdValue.ToInt32();
+					} else {
+						value = 0;
+					}
+				} finally {
+					NativeMethods.CFRelease (bsdPathAsCFValue);
 				}
-
-				NativeMethods.CFRelease(bsdPathAsCFValue);
 			} else {
 				value = 0;
 			}
@@ -332,7 +337,7 @@ namespace MonoMac.IOKit {
 		/// <summary>
 		/// Native methods.
 		/// </summary>
-		private static class NativeMethods {
+		private unsafe static class NativeMethods {
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
 			public static extern IntPtr __CFStringMakeConstantString(string str);
@@ -362,7 +367,7 @@ namespace MonoMac.IOKit {
 			public static extern int CFRelease(IntPtr obj);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
-			public static extern bool CFStringGetCString(IntPtr theString, StringBuilder buffer, long bufferSize, CFStringEncoding encoding);
+			public static extern bool CFStringGetCString(IntPtr theString, char* buffer, long bufferSize, CFStringEncoding encoding);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
 			public static extern bool CFNumberGetValue(IntPtr number, CFNumberType theType, out IntPtr valuePtr);
@@ -371,7 +376,7 @@ namespace MonoMac.IOKit {
 			public static extern int IORegistryEntryCreateIterator(IntPtr entry, string plane, uint options, out IntPtr iterator);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
-			public static extern int IORegistryEntryGetNameInPlane(IntPtr entry, string plane, StringBuilder name);
+			public static extern int IORegistryEntryGetNameInPlane(IntPtr entry, string plane, char* name);
 
 			[DllImport(IOKitFrameworkPath, CharSet = CharSet.Ansi)]
 			public static extern bool IOObjectConformsTo(IntPtr obj, string className);
@@ -405,6 +410,8 @@ namespace MonoMac.IOKit {
 					if (SerialPortIOKit.Verbosity > TraceVerbosity.Silent) {
 						Trace.TraceError("IOServiceGetMatchingServices returned {0}\n", kernResult);
 					}
+
+					return kernResult;
 				}
 
 				return KERN_SUCCESS;
@@ -430,18 +437,26 @@ namespace MonoMac.IOKit {
 				if (bsdPathAsCFString != IntPtr.Zero) {
 					// Convert the path from a CFString to a C (NUL-terminated) string for use
 					// with the POSIX open() call.
+					try {
+						unsafe {						
+							fixed (char* bsdPath = new char[maxPathSize]) {
+								var result = CFStringGetCString (bsdPathAsCFString, bsdPath, maxPathSize, CFStringEncoding.kCFStringEncodingUTF8);
 
-					var bsdPath = new StringBuilder(maxPathSize);
-					var result = CFStringGetCString(bsdPathAsCFString, bsdPath, maxPathSize, CFStringEncoding.kCFStringEncodingUTF8);
-					CFRelease(bsdPathAsCFString);
 
-					if (result) {
-						if (SerialPortIOKit.Verbosity > TraceVerbosity.ErrorAndWarning) {
-							Trace.TraceInformation("Modem found with BSD path: {0}", bsdPath);
+								if (result) {
+									var bsdPathStr = Marshal.PtrToStringAnsi ((IntPtr)bsdPath);
+
+									if (SerialPortIOKit.Verbosity > TraceVerbosity.ErrorAndWarning) {
+										Trace.TraceInformation ("Modem found with BSD path: {0}", bsdPathStr);
+									}
+
+									kernResult = KERN_SUCCESS;
+									path = bsdPathStr;
+								}
+							}
 						}
-
-						kernResult = KERN_SUCCESS;
-						path = bsdPath.ToString();
+					} finally {
+						CFRelease (bsdPathAsCFString);
 					}
 				}
 
@@ -461,15 +476,18 @@ namespace MonoMac.IOKit {
 				if (status == kIOReturnSuccess) {
 					var currentService = IntPtr.Zero;
 					while ((currentService = IOIteratorNext(iterator)) != IntPtr.Zero) {
-						var serviceName = new StringBuilder();
+						unsafe {
+							fixed (char* serviceName = new char[4096]) {
+								status = IORegistryEntryGetNameInPlane (currentService, kIOServicePlane, serviceName);
+							}
 
-						status = IORegistryEntryGetNameInPlane(currentService, kIOServicePlane, serviceName);
-						if ((status == kIOReturnSuccess) && (IOObjectConformsTo(currentService, kIOUSBDeviceClassName))) {
-							device = currentService;
-							break;
-						} else {
-							// Release the service object which is no longer needed
-							IOObjectRelease(currentService);
+							if ((status == kIOReturnSuccess) && (IOObjectConformsTo (currentService, kIOUSBDeviceClassName))) {
+								device = currentService;
+								break;
+							} else {
+								// Release the service object which is no longer needed
+								IOObjectRelease (currentService);
+							}
 						}
 					}
 
